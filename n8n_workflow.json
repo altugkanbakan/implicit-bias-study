@@ -1,0 +1,142 @@
+{
+  "name": "Implicit Bias Study",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "onam",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "get-webhook",
+      "name": "GET — Show Informed Consent Form",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 200],
+      "notes": "QR code / link points to this URL. When the browser sends a GET request, n8n returns the consent HTML page."
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "YOU_HAVE_TO_ADD_CONSENT_FORM_AS_HTML_HERE",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "get-response",
+      "name": "GET Response — Show HTML",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [460, 200],
+      "notes": "Paste the entire content of informedconsent.html into the Response Body field."
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "onam",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "post-webhook",
+      "name": "POST — Consent Has Been Given",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 440],
+      "notes": "The confirm button in informedconsent.html sends a POST request here with { consent: true, ts: ... }."
+    },
+    {
+      "parameters": {
+        "jsCode": "// ─────────────────────────────────────────────\n// BLOCK RANDOMIZATION + ANONYMOUS ID GENERATION\n// ─────────────────────────────────────────────\nconst staticData = $getWorkflowStaticData('global');\n\nif (!staticData.counts) {\n  staticData.counts = { arm1: 0, arm2: 0, arm3: 0, arm4: 0 };\n  staticData.totalParticipants = 0;\n  staticData.currentBlock = [];\n}\n\n// Generate anonymous UUID\nconst uuid = 'xxxx-xxxx-xxxx'.replace(/x/g, () =>\n  Math.floor(Math.random() * 16).toString(16)\n);\nconst participantId = 'P-' + uuid.toUpperCase();\n\n// Block randomization (block size = 4, Fisher-Yates shuffle)\nconst total = staticData.totalParticipants;\nconst posInBlock = total % 4;\n\nif (posInBlock === 0) {\n  const arms = [1, 2, 3, 4];\n  for (let i = arms.length - 1; i > 0; i--) {\n    const j = Math.floor(Math.random() * (i + 1));\n    [arms[i], arms[j]] = [arms[j], arms[i]];\n  }\n  staticData.currentBlock = arms;\n}\n\nconst assignedArm = staticData.currentBlock[posInBlock];\nstaticData.counts['arm' + assignedArm]++;\nstaticData.totalParticipants++;\n\n// ─────────────────────────────────────────────\n// FORM URLS — replace with your own JotForm links\n// Arm 1: Dependency-associated appearance + Objective pain (fracture)\n// Arm 2: Dependency-associated appearance + Subjective pain (renal colic)\n// Arm 3: Non-dependency appearance + Objective pain (fracture)\n// Arm 4: Non-dependency appearance + Subjective pain (renal colic)\n// ─────────────────────────────────────────────\nconst formUrls = {\n  1: 'https://form.jotform.com/ARM_1_FORM_ID',\n  2: 'https://form.jotform.com/ARM_2_FORM_ID',\n  3: 'https://form.jotform.com/ARM_3_FORM_ID',\n  4: 'https://form.jotform.com/ARM_4_FORM_ID'\n};\n\nconst armLabels = {\n  1: 'Dependency appearance + Objective pain',\n  2: 'Dependency appearance + Subjective pain',\n  3: 'Non-dependency appearance + Objective pain',\n  4: 'Non-dependency appearance + Subjective pain'\n};\n\nreturn {\n  participantId,\n  assignedArm,\n  assignedArmLabel: armLabels[assignedArm],\n  redirectUrl: formUrls[assignedArm],\n  timestamp: new Date().toISOString(),\n  currentCounts: { ...staticData.counts },\n  totalParticipants: staticData.totalParticipants\n};\n"
+      },
+      "id": "randomize-node",
+      "name": "Randomize & Generate ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 440]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "GOOGLE_SHEET_ID_COMES_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Participants",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ParticipantID": "={{ $json.participantId }}",
+            "AssignedArm": "={{ $json.assignedArm }}",
+            "ArmLabel": "={{ $json.assignedArmLabel }}",
+            "Timestamp": "={{ $json.timestamp }}",
+            "Arm1_N": "={{ $json.currentCounts.arm1 }}",
+            "Arm2_N": "={{ $json.currentCounts.arm2 }}",
+            "Arm3_N": "={{ $json.currentCounts.arm3 }}",
+            "Arm4_N": "={{ $json.currentCounts.arm4 }}",
+            "Total": "={{ $json.totalParticipants }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "sheets-node",
+      "name": "Google Sheets Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [720, 340]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ redirectUrl: $json.redirectUrl, participantId: $json.participantId }) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "post-response",
+      "name": "POST Response — Return redirectUrl",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [720, 540],
+      "notes": "Returns JSON { redirectUrl, participantId } to informedconsent.html, which then redirects the participant."
+    }
+  ],
+  "connections": {
+    "GET — Show Informed Consent Form": {
+      "main": [[{ "node": "GET Response — Show HTML", "type": "main", "index": 0 }]]
+    },
+    "POST — Consent Has Been Given": {
+      "main": [[{ "node": "Randomize & Generate ID", "type": "main", "index": 0 }]]
+    },
+    "Randomize & Generate ID": {
+      "main": [[
+        { "node": "Google Sheets Log", "type": "main", "index": 0 },
+        { "node": "POST Response — Return redirectUrl", "type": "main", "index": 0 }
+      ]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null
+}
