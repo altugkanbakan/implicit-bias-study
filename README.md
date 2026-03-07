@@ -42,14 +42,14 @@ Patient images were synthetically generated using MidJourney v6 (Midjourney Inc.
 ```
 Participant scans QR code / opens link
             ↓
-  Cloudflare Worker (selfweb.me/calisma)
+  Cloudflare Worker (XYZ.com/page)
   — masks n8n infrastructure from participants
             ↓
-     GET /onam → n8n serves informed consent HTML page
+     GET /informedconsent → n8n serves informed consent HTML page
             ↓
   Participant reads consent and clicks "I agree"
             ↓
-     POST /onam → n8n executes block randomization
+     POST /informedconsent → n8n executes block randomization
             ↓
   ┌─────────────────────────────────┐
   │  Assigns participant to Arm 1–4 │
@@ -119,7 +119,7 @@ Each participant receives an anonymous UUID (format: `P-XXXX-XXXX-XXXX`) generat
 
 1. Open n8n → **Workflows → Import from file**
 2. Upload `n8n_workflow.json`
-3. In the **Randomizasyon & ID Üret** (Code) node, replace the four `formUrls` values with your own JotForm links
+3. In the **Randomization & Generate ID** (Code) node, replace the four `formUrls` values with your own JotForm links
 4. Connect your Google Sheets credential and update the Sheet ID
 5. **Activate** the workflow (toggle top-right) — note the Production webhook URL
 
@@ -133,7 +133,7 @@ Each participant receives an anonymous UUID (format: `P-XXXX-XXXX-XXXX`) generat
 
 ### Step 3 — Consent Page
 
-The consent page (`onam.html`) is served dynamically by the n8n GET webhook — no separate hosting is required. The Cloudflare Worker automatically rewrites all internal URLs so the n8n domain is never exposed to participants.
+The consent page (`informedconsent.html`) is served dynamically by the n8n GET webhook — no separate hosting is required. The Cloudflare Worker automatically rewrites all internal URLs so the n8n domain is never exposed to participants.
 
 ---
 
