@@ -169,5 +169,3 @@ If you use this infrastructure in your own research, please cite:
 This project is licensed under the MIT License — you are free to use, adapt, and redistribute this infrastructure for your own research.
 
 ---
-
-*Principal Investigator: Asst. Prof. Altuğ Kanbakan,MD,MS*
