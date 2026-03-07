@@ -101,7 +101,7 @@ Each participant receives an anonymous UUID (format: `P-XXXX-XXXX-XXXX`) generat
 ├── n8n_workflow.json                # Importable n8n workflow
 ├── cloudflare_worker.js             # Cloudflare Worker edge proxy script
 └── consent_page/
-    └── onam.html                    # Informed consent HTML page
+    └── informedconsent.html         # Informed consent HTML page
 ```
 
 ---
