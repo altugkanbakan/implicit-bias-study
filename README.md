@@ -142,7 +142,8 @@ The consent page (`informedconsent.html`) is served dynamically by the n8n GET w
 - No IP addresses, email addresses, or any personally identifiable information are collected
 - Participant identifiers are randomly generated UUIDs with no link to real-world identity
 - The study was conducted in accordance with the Declaration of Helsinki
-- Ethical approval: *[Institution and approval number to be added upon publication]*
+- Ethical approval: *Ufuk University Clinical/Non-interventional Research Ethics Committee; approval no 26.02.27.05/04 and date 02.27.2026*
+- Acknowledgment: This study supported by the *Ufuk University Scientific Research Projects (BAP) program (UFUK-BAP-2026-004).*
 
 ---
 
