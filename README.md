@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![n8n](https://img.shields.io/badge/automation-n8n-orange)](https://n8n.io)
 [![Cloudflare Workers](https://img.shields.io/badge/edge-Cloudflare%20Workers-orange)](https://workers.cloudflare.com)
+[![DOI](https://zenodo.org/badge/1174939018.svg)](https://doi.org/10.5281/zenodo.20825869)
 
 > Technical infrastructure for a prospective, randomized controlled, double-blind, 2×2 factorial vignette study examining implicit bias in emergency pain management decisions.
 
